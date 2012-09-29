@@ -23,7 +23,7 @@ from horizons.command.uioptions import AddToBuyList
 from horizons.component.tradepostcomponent import TradePostComponent
 from horizons.constants import RES, TIER
 
-from tests.gui import gui_test, TestFinished
+from tests.gui import gui_test
 from tests.gui.helper import get_player_ship, move_ship
 from tests.gui.scenarios.helper import (assert_win, var_eq, wait_and_close_logbook,
 										settlement_res_stored_greater, settler_level_greater)
@@ -32,26 +32,27 @@ from tests.gui.scenarios.helper import (assert_win, var_eq, wait_and_close_logbo
 @gui_test(use_scenario='content/scenarios/tutorial_en', timeout=360)
 def test_tutorial(gui):
 	"""Test the tutorial scenario."""
-	yield
 
 	# FIXME disable disasters (this should be an option for a scenario)
 	gui.session.world.disaster_manager.disabled = True
 
+	def assert_progress(progress):
+		wait_and_close_logbook(gui)
+		assert var_eq(gui.session, 'tutorial_progress', progress)
+
 	# Tutorial start
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 16)
+	assert_progress(16)
 
 	# Goal: Build warehouse
 	ship = get_player_ship(gui.session)
-	for _ in move_ship(ship, (11, 1)): yield
+	move_ship(ship, (11, 1))
 
 	gui.select([ship])
 	gui.trigger('overview_trade_ship', 'found_settlement')
 	gui.cursor_click(11, 6, 'left')
 
 	# Goal: Build a lumberjack
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 19)
+	assert_progress(19)
 
 	# lumberjack
 	gui.trigger('mainhud', 'build')
@@ -60,14 +61,10 @@ def test_tutorial(gui):
 
 	# roads
 	gui.trigger('tab', 'button_21')
-	gui.cursor_click(10, 8, 'left', shift=True)
-	gui.cursor_click(10, 9, 'left', shift=True)
-	gui.cursor_click(10, 10, 'left', shift=True)
-	gui.cursor_click(10, 11, 'right')
+	gui.cursor_multi_click((10, 8), (10, 9), (10, 10))
 
 	# Goal: Build hunter and fisher
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 22)
+	assert_progress(22)
 
 	# fisher
 	gui.trigger('tab', 'button_33')
@@ -78,56 +75,43 @@ def test_tutorial(gui):
 	gui.cursor_click(8, 8, 'left')
 	
 	# Goal: Mainsquare
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 25)
+	assert_progress(25)
 
 	gui.trigger('tab', 'button_02')
 	gui.cursor_click(15, 18, 'left')
 
 	# Goal: first tent
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 28)
+	assert_progress(28)
 
 	# roads
 	gui.trigger('tab', 'button_21')
-	gui.cursor_click(13, 15, 'left', shift=True)
-	gui.cursor_click(14, 15, 'left', shift=True)
-	gui.cursor_click(15, 15, 'left', shift=True)
-	gui.cursor_click(16, 15, 'left', shift=True)
-	gui.cursor_click(17, 15, 'left', shift=True)
-	gui.cursor_click(18, 15, 'left', shift=True)
-	gui.cursor_click(19, 15, 'left', shift=True)
-	gui.cursor_click(20, 15, 'left', shift=True)
-	gui.cursor_click(20, 15, 'right')
+	gui.cursor_multi_click(
+		(13, 15), (14, 15), (16, 15), (17, 15),
+		(18, 15), (19, 15), (20, 15)
+	)
 
 	# tent
 	gui.trigger('tab', 'button_01')
 	gui.cursor_click(13, 13, 'left')
 
 	# Goal: 4 tents
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 31)
+	assert_progress(31)
 
 	gui.trigger('tab', 'button_01')
-	gui.cursor_click(15, 13, 'left', shift=True)
-	gui.cursor_click(17, 13, 'left', shift=True)
-	gui.cursor_click(19, 13, 'left', shift=True)
-	gui.cursor_click(19, 13, 'right')
+	gui.cursor_multi_click((15, 13), (17, 13), (19, 13))
 
 	# Goal: Build a signal fire
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 34)
+	assert_progress(34)
 
 	# wait until we have enough boards
 	while not settlement_res_stored_greater(gui.session, RES.BOARDS, 5):
-		yield
+		gui.run()
 
 	gui.trigger('tab', 'button_22')
 	gui.cursor_click(9, 5, 'left')
 
 	# Goal: Trading
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 37)
+	assert_progress(37)
 
 	# TODO do this with the gui (needs named buttons and a way to control the slider)
 	player = gui.session.world.player
@@ -135,41 +119,37 @@ def test_tutorial(gui):
 	AddToBuyList(tradepost, RES.TOOLS, 30)(player)
 
 	# Goal: Pavilion
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 40)
+	assert_progress(40)
 
 	# wait until we have enough boards
 	while not settlement_res_stored_greater(gui.session, RES.BOARDS, 5):
-		yield
+		gui.run()
 
 	gui.trigger('tab', 'button_12')
 	gui.cursor_click(19, 16, 'left')
 
 	# Goal: Next tier
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 43)
+	assert_progress(43)
 
 	# TODO adjust settler taxes
 
 	# wait until settlers upgraded
 	while not settler_level_greater(gui.session, TIER.SAILORS):
-		yield
+		gui.run()
 
 	# Goal: Farm
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 46)
+	assert_progress(46)
 
 	# wait until we have enough boards
 	while not settlement_res_stored_greater(gui.session, RES.BOARDS, 10):
-		yield
+		gui.run()
 
 	gui.trigger('tab_base', '1') # FIXME this sometimes fails
 	gui.trigger('tab', 'button_02')
 	gui.cursor_click(25, 12, 'left')
 	
 	# Goal: Fields
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 49)
+	assert_progress(49)
 
 	gui.trigger('tab_base', '1')
 
@@ -182,8 +162,7 @@ def test_tutorial(gui):
 	gui.cursor_click(21, 10, 'left')
 
 	# Goal: Storage
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 52)
+	assert_progress(52)
 
 	# remove a tree to connect to farm
 	gui.trigger('mainhud', 'destroy_tool')
@@ -193,40 +172,30 @@ def test_tutorial(gui):
 	gui.trigger('mainhud', 'build')
 	gui.trigger('tab_base', '0')
 	gui.trigger('tab', 'button_21')
-	gui.cursor_click(21, 15, 'left', shift=True)
-	gui.cursor_click(22, 15, 'left', shift=True)
-	gui.cursor_click(23, 15, 'left', shift=True)
-	gui.cursor_click(24, 15, 'left', shift=True)
-	gui.cursor_click(24, 14, 'left', shift=True)
-	gui.cursor_click(24, 14, 'right')
+	gui.cursor_multi_click((21, 15), (22, 15), (23, 15), (24, 15), (24, 14))
 	
 	# storage tent
 	gui.trigger('tab', 'button_11')
 	gui.cursor_click(21, 16, 'left')
 
 	# Goal: Weaver
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 55)
+	assert_progress(55)
 
 	# wait until we have enough boards
 	while not settlement_res_stored_greater(gui.session, RES.BOARDS, 10):
-		yield
+		gui.run()
 
 	gui.trigger('tab_base', '1')
 	gui.trigger('tab', 'button_21')
 	gui.cursor_click(25, 14, 'left')
 
 	# Goal: 50 inhabitants, positive balance
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 58)
+	assert_progress(58)
 	
 	# more potatoe fields
 	gui.trigger('tab_base', '1')
 	gui.trigger('tab', 'button_12')
-	gui.cursor_click(24, 9, 'left', shift=True)
-	gui.cursor_click(27, 8, 'left', shift=True)
-	gui.cursor_click(27, 11, 'left', shift=True)
-	gui.cursor_click(27, 11, 'right')
+	gui.cursor_multi_click((24, 9), (27, 8), (27, 11))
 
 	# lumberjack (more wood for upgrades)
 	gui.trigger('tab_base', '0')
@@ -235,25 +204,17 @@ def test_tutorial(gui):
 
 	# wait until we have enough boards
 	while not settlement_res_stored_greater(gui.session, RES.BOARDS, 39):
-		yield
+		gui.run()
 
 	# tents
 	gui.trigger('tab', 'button_01')
-	gui.cursor_click(11, 14, 'left', shift=True)
-	gui.cursor_click(11, 15, 'left', shift=True)
-	gui.cursor_click(12, 17, 'left', shift=True)
-	gui.cursor_click(11, 20, 'left', shift=True)
-	gui.cursor_click(12, 22, 'left', shift=True)
-	gui.cursor_click(14, 22, 'left', shift=True)
-	gui.cursor_click(16, 22, 'left', shift=True)
-	gui.cursor_click(18, 22, 'left', shift=True)
-	gui.cursor_click(19, 20, 'left', shift=True)
-	gui.cursor_click(22, 15, 'left', shift=True)
-	gui.cursor_click(19, 20, 'right')
+	gui.cursor_multi_click(
+		(11, 14), (11, 15), (12, 17), (11, 20),
+		(12, 22), (14, 22), (16, 22), (18, 22),
+		(19, 20), (22, 15)
+	)
 
 	# Goal: Won
-	for _ in wait_and_close_logbook(gui): yield
-	assert var_eq(gui.session, 'tutorial_progress', 61)
+	assert_progress(61)
 
-	for _ in assert_win(gui): yield
-	yield TestFinished
+	assert_win(gui)

@@ -27,7 +27,7 @@ from fife.extensions.pychan.widgets import Icon, HBox, Label, Container
 from horizons.command.production import AddProduction, RemoveFromQueue, CancelCurrentProduction
 from horizons.gui.tabs import OverviewTab
 from horizons.gui.util import create_resource_icon
-from horizons.gui.widgets import OkButton, CancelButton
+from horizons.gui.widgets.imagebutton import OkButton, CancelButton
 from horizons.scheduler import Scheduler
 from horizons.util.python.callback import Callback
 from horizons.constants import PRODUCTIONLINES, RES, UNITS, GAME_SPEED
@@ -52,7 +52,7 @@ class BoatbuilderTab(_BoatbuilderOverviewTab):
 
 	def show(self):
 		super(BoatbuilderTab, self).show()
-		Scheduler().add_new_object(Callback(self.refresh), self, run_in = GAME_SPEED.TICKS_PER_SECOND, loops = -1)
+		Scheduler().add_new_object(Callback(self.refresh), self, run_in=GAME_SPEED.TICKS_PER_SECOND, loops=-1)
 
 	def hide(self):
 		super(BoatbuilderTab, self).hide()
@@ -129,8 +129,8 @@ class BoatbuilderTab(_BoatbuilderOverviewTab):
 
 			upgrades_box = container_active.findChild(name="BB_upgrades_box")
 			upgrades_box.removeAllChildren()
-#			upgrades_box.addChild( pychan.widgets.Label(text=u"+ love") )
-#			upgrades_box.addChild( pychan.widgets.Label(text=u"+ affection") )
+#			upgrades_box.addChild(Label(text=u"+ love"))
+#			upgrades_box.addChild(Label(text=u"+ affection"))
 # no upgrades in 2010.1 release ---^
 			upgrades_box.stylize('menu_black')
 
