@@ -70,7 +70,7 @@ class Path(ComponentHolder):
 		 \  e  /     a,b,c,d are connections to nearby roads
 		  \   /
 		   \ /       e,f,g,h indicate whether this area occupies more space than
-		 h  x  f     a single road would (i.e. whether we should fill this three-
+		 h  X  f     a single road would (i.e. whether we should fill this three-
 		   / \       cornered space with graphics that will make it look like a
 		  /   \      coherent square instead of many short-circuit road circles).
 		 /  g  \     Note that 'e' can only be placed if both 'a' and 'b' exist.
