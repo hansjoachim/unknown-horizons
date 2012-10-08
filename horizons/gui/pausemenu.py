@@ -23,6 +23,7 @@ import horizons.main
 
 from horizons.command.game import PauseCommand, UnPauseCommand
 from horizons.gui.window import Window
+from horizons.savegamemanager import SavegameManager
 from horizons.util.startgameoptions import StartGameOptions
 
 
@@ -61,9 +62,16 @@ class PauseMenu(Window):
 		self.widget.hide()
 
 	def save_game(self):
-		"""Wrapper for saving for separating gui messages from save logic"""
-		success = self._gui.session.save()
-		if not success:
+		savegamename = self.windows.show(self._gui._save_game)
+		if not savegamename:
+			return False  # user aborted dialog
+
+		savegamename = SavegameManager.create_filename(savegamename)
+
+		success = self._gui.session.save(savegamename)
+		if success:
+			self._gui.message_widget.add(point=None, string_id='SAVED_GAME')
+		else:
 			# There was a problem during the 'save game' procedure.
 			self.windows.show_popup(_('Error'), _('Failed to save.'))
 
@@ -76,4 +84,3 @@ class PauseMenu(Window):
 		options = StartGameOptions(saved_game)
 		horizons.main.start_singleplayer(options)
 		return True
-

@@ -166,7 +166,7 @@ class LoadGameDialog(Dialog, _Common):
 		selected_item = self._widget.collectData("savegamelist")
 
 		if retval == 'delete':
-			# Show confirmation dialog and reshow savegame dialog
+			# Show confirmation dialog and reshow loadgame dialog
 			self._delete_savegame(selected_item)
 			return self.windows.show(self)
 		elif retval:
@@ -177,6 +177,81 @@ class LoadGameDialog(Dialog, _Common):
 		else:
 			assert False
 
+
+class SaveGameDialog(Dialog, _Common):
+	return_events = {
+		OkButton.DEFAULT_NAME     : True,
+		'savegamefile'            : True,
+		CancelButton.DEFAULT_NAME : False,
+		DeleteButton.DEFAULT_NAME : 'delete',
+	}
+	widget_name = 'select_savegame'
+
+	def prepare(self):
+		self._map_files, self._map_file_display = SavegameManager.get_regular_saves()
+
+		helptext = _('Save game')
+		self._widget.findChild(name='headline').text = helptext
+		self._widget.findChild(name=OkButton.DEFAULT_NAME).helptext = helptext
+
+		hide_widget(self._widget.findChild(name="gamename_box"))
+		hide_widget(self._widget.findChild(name="gamepassword_box"))
+
+		self.filename = self._widget.findChild(name='enter_filename')
+		self.filename.parent.showChild(self.filename)
+
+		# Fill listbox and make sure no item is selected
+		self._widget.distributeInitialData({'savegamelist': self._map_file_display})
+		self._widget.distributeData({'savegamelist': -1})
+
+		self._widget.mapEvents({'savegamelist/action': self._update})
+		self._widget.findChild(name="savegamelist").capture(self._update, event_name="keyPressed")
+
+		self._update()
+
+	def _update(self):
+		"""Fill in the name of the selected savegame in the textbox"""
+		selected_item = self._widget.collectData('savegamelist')
+		if selected_item == -1:
+			self._widget.findChild(name="savegamefile").text = u""
+		else:
+			savegamefile = self._map_file_display[selected_item]
+			self._widget.distributeData({'savegamefile': savegamefile})
+
+		self._update_game_details()
+
+	def post(self, retval):
+		if not retval:  # cancelled
+			return
+
+		if retval == 'delete':
+			# Show confirmation dialog and reshow savegame dialog
+			selected_item = self._widget.collectData("savegamelist")
+			self._delete_savegame(selected_item)
+			return self.windows.show(self)
+		elif retval:
+			return self._handle_save()
+		else:
+			assert False
+
+	def _handle_save(self):
+		selected_savegame = self._widget.collectData('savegamefile')
+		if selected_savegame == "":
+			# No filename, reshow dialog
+			self.windows.show_error_popup(windowtitle=_("No filename given"),
+			                              description=_("Please enter a valid filename."))
+			return self.windows.show(self)
+		elif selected_savegame in self._map_file_display: # savegamename already exists
+			# Savegame name exists, ask for confirmation
+			#xgettext:python-format
+			message = _("A savegame with the name '{name}' already exists.").format(
+						 name=selected_savegame) + u"\n" + _('Overwrite it?')
+			# keep the pop-up non-modal because otherwise it is double-modal (#1876)
+			if not self.windows.show_popup(_("Confirmation for overwriting"), message, show_cancel_button=True, modal=False):
+				return self.windows.show(self)
+		else:
+			assert False
+		
 
 class SaveLoad(Dialog):
 	return_events = {

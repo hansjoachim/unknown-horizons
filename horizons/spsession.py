@@ -21,8 +21,6 @@
 
 import random
 
-import horizons.main
-
 from horizons.session import Session
 from horizons.manager import SPManager
 from horizons.constants import SINGLEPLAYER
@@ -69,18 +67,9 @@ class SPSession(Session):
 			           u"unknown-horizons.org/support/"
 			self.gui.show_error_popup(headline, descr, advice)
 
-	def save(self, savegamename=None):
+	def save(self, savegamename):
 		"""Saves a game
-		@param savegamename: string with the full path of the savegame file or None to let user pick one
-		@return: bool, whether no error happened (user aborting dialog means success)
+		@param savegamename: string with the full path of the savegame file
+		@return: bool, whether no error happened
 		"""
-		if savegamename is None:
-			savegamename = self.gui.show_select_savegame(mode='save')
-			if savegamename is None:
-				return True # user aborted dialog
-			savegamename = SavegameManager.create_filename(savegamename)
-
-		success= self._do_save(savegamename)
-		if success:
-			self.ingame_gui.message_widget.add(point=None, string_id='SAVED_GAME')
-		return success
+		return self._do_save(savegamename)

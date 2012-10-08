@@ -41,7 +41,7 @@ from horizons.constants import BUILDINGS, GUI
 from horizons.command.game import SpeedDownCommand, SpeedUpCommand
 from horizons.gui.ingame import ChangeNameDialog, SaveMapDialog, ChatDialog, LogbookProxy
 from horizons.gui.pausemenu import PauseMenu
-from horizons.gui.mainmenu import Help, Settings, SaveLoad, LoadGameDialog
+from horizons.gui.mainmenu import Help, Settings, SaveLoad, LoadGameDialog, SaveGameDialog
 from horizons.gui.tabs.tabinterface import TabInterface
 from horizons.gui.tabs import MainSquareOverviewTab
 from horizons.gui.window import WindowManager
@@ -95,6 +95,7 @@ class IngameGui(LivingObject):
 		self._logbook_proxy = LogbookProxy(self.widgets, gui=self, manager=self.windows)
 		self._saveload = SaveLoad(self.widgets, gui=self, manager=self.windows)
 		self._load_game = LoadGameDialog(self.widgets, manager=self.windows)
+		self._save_game = SaveGameDialog(self.widgets, manager=self.windows)
 
 		self.cityinfo = self.widgets['city_info']
 		self.cityinfo.child_finder = PychanChildFinder(self.cityinfo)
