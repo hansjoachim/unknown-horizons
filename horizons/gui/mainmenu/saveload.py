@@ -24,10 +24,158 @@ import tempfile
 import time
 
 import horizons.main
+from horizons.constants import VERSION
 from horizons.gui.window import Dialog
 from horizons.gui.widgets.imagebutton import OkButton, CancelButton, DeleteButton
+from horizons.gui.util import hide_widget
 from horizons.savegamemanager import SavegameManager
 from horizons.util.python.callback import Callback
+
+
+class _Common(object):
+
+	def _update_game_details(self):
+		"""Fetches details of selected savegame and displays it"""
+
+		self._widget.findChild(name="screenshot").image = None
+		map_file_index = self._widget.collectData('savegamelist')
+		if map_file_index == -1:
+			return
+
+		try:
+			map_file = self._map_files[map_file_index]
+		except IndexError:
+			# this was a click in the savegame list, but not on an element
+			# it happens when the savegame list is empty
+			return
+
+		savegame_info = SavegameManager.get_metadata(map_file)
+
+		# Write screenshot image to a temporary file
+		if 'screenshot' in savegame_info:
+			# Fife requires a relative path, therefore we need to find a writable location
+			fd, filename = tempfile.mkstemp()
+			try:
+				path_rel = os.path.relpath(filename)
+			except ValueError: # the relative path sometimes doesn't exist on win
+				os.close(fd)
+				os.unlink(filename)
+				# try again in the current dir, it's often writable
+				fd, filename = tempfile.mkstemp(dir=os.curdir)
+				try:
+					path_rel = os.path.relpath(filename)
+				except ValueError:
+					fd, filename = None, None
+
+			if fd:
+				with os.fdopen(fd, "w") as f:
+					f.write(savegame_info['screenshot'])
+				# fife only supports relative paths
+				self._widget.findChild(name="screenshot").image = path_rel
+				os.unlink(filename)
+
+		# Save date
+		details_label = self._widget.findChild(name="savegamedetails_lbl")
+		details_label.text = u""
+		if savegame_info['timestamp'] == -1:
+			details_label.text += _("Unknown savedate")
+		else:
+			savetime = time.strftime("%c", time.localtime(savegame_info['timestamp']))
+			#xgettext:python-format
+			details_label.text += _("Saved at {time}").format(time=savetime.decode('utf-8'))
+
+		# Save counter
+		details_label.text += u'\n'
+		counter = savegame_info['savecounter']
+		#xgettext:python-format
+		details_label.text += N_("Saved {amount} time",
+								 "Saved {amount} times",
+								 counter).format(amount=counter)
+		details_label.text += u'\n'
+
+		# Savegame version
+		try:
+			#xgettext:python-format
+			details_label.text += _("Savegame version {version}").format(
+									 version=savegame_info['savegamerev'])
+			if savegame_info['savegamerev'] != VERSION.SAVEGAMEREVISION:
+				#xgettext:python-format
+				details_label.text += u" " + _("(potentially incompatible)")
+		except KeyError:
+			# this should only happen for very old savegames, so having this unfriendly
+			# error is ok (savegame is quite certainly fully unusable).
+			details_label.text += _("Incompatible version")
+
+		details_label.stylize('book')
+		self._widget.adaptLayout()
+
+	def _delete_savegame(self, selected_item):
+		"""Deletes the selected savegame if the user confirms."""
+		if selected_item == -1 or selected_item >= len(self._map_files):
+			self.windows.show_popup(_("No file selected"), _("You need to select a savegame to delete."))
+			return
+
+		selected_file = self._map_files[selected_item]
+		#xgettext:python-format
+		message = _("Do you really want to delete the savegame '{name}'?").format(
+		             name=SavegameManager.get_savegamename_from_filename(selected_file))
+		if self.windows.show_popup(_("Confirm deletion"), message, show_cancel_button=True):
+			try:
+				os.unlink(selected_file)
+			except OSError as err:
+				self.windows.show_popup(_("Error!"), _("Failed to delete savefile!") + "\n%s" % err)
+
+
+class LoadGameDialog(Dialog, _Common):
+	return_events = {
+		OkButton.DEFAULT_NAME     : True,
+		CancelButton.DEFAULT_NAME : False,
+		DeleteButton.DEFAULT_NAME : 'delete'
+	}
+	widget_name = 'select_savegame'
+
+	def prepare(self):
+		# Load available savegames
+		self._map_files, map_file_display = SavegameManager.get_saves()
+		if not self._map_files:
+			self.windows.close()
+			self.windows.show_popup(_("No saved games"), _("There are no saved games to load."))
+			return False
+
+		helptext = _('Load game')
+		self._widget.findChild(name='headline').text = helptext
+		self._widget.findChild(name=OkButton.DEFAULT_NAME).helptext = helptext
+
+		hide_widget(self._widget.findChild(name="gamename_box"))
+		hide_widget(self._widget.findChild(name="gamepassword_box"))
+		hide_widget(self._widget.findChild(name='enter_filename'))
+
+		# Fill listbox and select first
+		self._widget.distributeInitialData({'savegamelist': map_file_display})
+		self._widget.distributeData({'savegamelist': 0})
+
+		self._widget.mapEvents({'savegamelist/action': self._update_game_details})
+		self._widget.findChild(name="savegamelist").capture(self._update_game_details, event_name="keyPressed")
+
+		self._update_game_details()
+
+	def post(self, retval):
+		if not retval:  # cancelled
+			return
+
+		selected_item = self._widget.collectData("savegamelist")
+
+		if retval == 'delete':
+			# Show confirmation dialog and reshow savegame dialog
+			self._delete_savegame(selected_item)
+			return self.windows.show(self)
+		elif retval:
+			# Return selected savegame
+			assert selected_item != -1, "No savegame selected in savegamelist"
+			selected_savegame = self._map_files[selected_item]
+			return selected_savegame
+		else:
+			assert False
 
 
 class SaveLoad(Dialog):

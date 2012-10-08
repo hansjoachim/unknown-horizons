@@ -21,7 +21,7 @@
 
 from .call_for_support import CallForSupport
 from .credits import Credits
-from .saveload import SaveLoad, EditorLoadMap
+from .saveload import SaveLoad, EditorLoadMap, LoadGameDialog
 from .help import Help
 from .singleplayer import SingleplayerMenu
 from .multiplayer import MultiplayerMenu

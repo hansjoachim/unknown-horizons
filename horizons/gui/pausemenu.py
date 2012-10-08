@@ -68,7 +68,7 @@ class PauseMenu(Window):
 			self.windows.show_popup(_('Error'), _('Failed to save.'))
 
 	def load_game(self):
-		saved_game = self.windows.show(self._gui._saveload, mode='load')
+		saved_game = self.windows.show(self._gui._load_game)
 		if saved_game is None:
 			return False # user aborted dialog
 

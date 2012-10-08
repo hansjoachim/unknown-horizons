@@ -204,3 +204,9 @@ def create_resource_selection_dialog(on_click, inventory, db,
 	vbox.adaptLayout()
 
 	return dlg
+
+
+def hide_widget(widget):
+	# TODO Why do we need this?
+	if widget not in widget.parent.hidden_children:
+		widget.parent.hideChild(widget)

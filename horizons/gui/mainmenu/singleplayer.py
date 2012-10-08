@@ -33,7 +33,7 @@ from horizons.extscheduler import ExtScheduler
 from horizons.savegamemanager import SavegameManager
 from horizons.gui.mainmenu.aidataselection import AIDataSelection
 from horizons.gui.mainmenu.playerdataselection import PlayerDataSelection
-from horizons.constants import AI, LANGUAGENAMES
+from horizons.constants import LANGUAGENAMES
 from horizons.gui.widgets.imagebutton import OkButton
 from horizons.gui.widgets.minimap import Minimap
 from horizons.gui.window import Window

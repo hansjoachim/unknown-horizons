@@ -27,7 +27,7 @@ from horizons.messaging import GuiAction
 from horizons.component.ambientsoundcomponent import AmbientSoundComponent
 from horizons.gui.mainmenu import (CallForSupport, Credits, SaveLoad, Help, SingleplayerMenu,
                                    MultiplayerMenu, Settings, MainMenu, LoadingScreen, Background,
-                                   EditorLoadMap)
+                                   EditorLoadMap, LoadGameDialog)
 from horizons.gui.util import LazyWidgetsDict
 from horizons.gui.window import WindowManager
 from horizons.util.startgameoptions import StartGameOptions
@@ -77,11 +77,12 @@ class Gui(object):
 		self._mainmenu = MainMenu(self.widgets, gui=self, manager=self._windows)
 		self._loadingscreen = LoadingScreen(self.widgets, manager=self._windows)
 		self._background = Background(self.widgets)
+		self._load_game = LoadGameDialog(self.widgets, manager=self._windows)
 
 		GuiAction.subscribe( self._on_gui_action )
 
 	def load_game(self):
-		saved_game = self.show_select_savegame(mode='load')
+		saved_game = self._windows.show(self._load_game)
 		if saved_game is None:
 			return False # user aborted dialog
 
