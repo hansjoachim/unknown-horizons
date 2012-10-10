@@ -316,7 +316,7 @@ class BuildingTool(NavigationTool):
 				self.buildings_action_set_ids[i] = action_set_id
 
 			settlement = self.session.world.get_settlement(building.position.origin)
-			if settlement is not None and settlement.owner != self.session.world.player:
+			if settlement is not None and not settlement.owner.is_local_player:
 				settlement = None # no fraternising with the enemy, else there would be peace
 
 			if self._class.id != BUILDINGS.WAREHOUSE:
@@ -773,7 +773,6 @@ class SettlementBuildingToolLogic(object):
 		# resolved variables from inner loops
 		is_tile_buildable = building_tool._class.is_tile_buildable
 		session = building_tool.session
-		player = session.world.player
 
 		if not self.subscribed:
 			self.subscribed = True
@@ -784,13 +783,15 @@ class SettlementBuildingToolLogic(object):
 				if is_tile_buildable(session, tile, None):
 					building_tool._color_buildable_tile(tile)
 
-		else: #default build on island
+		else: # default build on island
 			for settlement in session.world.settlements:
-				if settlement.owner == player:
-					island = session.world.get_island(Point(*settlement.ground_map.iterkeys().next()))
-					for tile in settlement.ground_map.itervalues():
-						if is_tile_buildable(session, tile, None, island, check_settlement=False):
-							building_tool._color_buildable_tile(tile)
+				if not settlement.owner.is_local_player:
+					continue
+				point = Point(*settlement.ground_map.iterkeys().next())
+				island = session.world.get_island(point)
+				for tile in settlement.ground_map.itervalues():
+					if is_tile_buildable(session, tile, None, island, check_settlement=False):
+						building_tool._color_buildable_tile(tile)
 
 	def _on_update(self, message):
 		if self.building_tool():
