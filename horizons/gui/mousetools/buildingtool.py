@@ -239,9 +239,10 @@ class BuildingTool(NavigationTool):
 
 	def draw_gui(self):
 		if not hasattr(self, "action_set"):
-			level = self.session.world.player.settler_level if \
-				not hasattr(self._class, "default_level_on_build") else \
-				self._class.default_level_on_build
+			if hasattr(self._class, "default_level_on_build"):
+				level = self._class.default_level_on_build
+			else:
+				level = self.session.world.player.settler_level
 			self.action_set = self._class.get_random_action_set(level=level, include_preview=True)
 		action_set, preview_action_set = self.action_set
 		action_sets = ActionSetLoader.get_sets()
@@ -269,7 +270,6 @@ class BuildingTool(NavigationTool):
 
 	def preview_build(self, point1, point2, force=False):
 		"""Display buildings as preview if build requirements are met"""
-		#self.session.view.renderer['InstanceRenderer'].removeAllColored()
 		self.log.debug("BuildingTool: preview build at %s, %s", point1, point2)
 		new_buildings = self._class.check_build_line(self.session, point1, point2,
 		                                             rotation=self.rotation, ship=self.ship)
@@ -285,7 +285,8 @@ class BuildingTool(NavigationTool):
 		# get new ones
 		self.buildings = new_buildings
 		# resize list of action set ids to new buildings
-		self.buildings_action_set_ids = self.buildings_action_set_ids + ([None] * (len(self.buildings) - len(self.buildings_action_set_ids)))
+		fill_amount = len(self.buildings) - len(self.buildings_action_set_ids)
+		self.buildings_action_set_ids = self.buildings_action_set_ids + ([None] * fill_amount)
 		self.buildings_action_set_ids = self.buildings_action_set_ids[ : len(self.buildings) ]
 		# delete old infos
 		self.buildings_fife_instances.clear()
@@ -296,20 +297,22 @@ class BuildingTool(NavigationTool):
 		# check if the buildings are buildable and color them appropriatly
 		for i, building in enumerate(self.buildings):
 			# get gfx for the building
-			# workaround for buildings like settler, that don't use the current level of
-			# the player, but always start at a certain lvl
-			level = self.session.world.player.settler_level if \
-				not hasattr(self._class, "default_level_on_build") else \
-				self._class.default_level_on_build
+
+			if hasattr(self._class, "default_level_on_build"):
+				# workaround for residential buildings that do not use the max tier
+				# the player reached, but instead always start at a certain level
+				level = self._class.default_level_on_build
+			else:
+				level = self.session.world.player.settler_level
 
 			if self._class.id == BUILDINGS.TREE and not building.buildable:
-				continue # Tree/ironmine that is not buildable, don't preview
+				continue # tree that is not buildable, don't preview
 			else:
 				fife_instance, action_set_id = \
 					self._class.getInstance(self.session, building.position.origin.x,
-								            building.position.origin.y, rotation=building.rotation,
-								            action=building.action, level=level,
-								            action_set_id=self.buildings_action_set_ids[i])
+					                        building.position.origin.y, rotation=building.rotation,
+					                        action=building.action, level=level,
+					                        action_set_id=self.buildings_action_set_ids[i])
 				self.buildings_fife_instances[building] = fife_instance
 				# remember action sets per order of occurence
 				# (this is far from good when building lines, but suffices for our purposes, which is mostly single build)
@@ -530,7 +533,7 @@ class BuildingTool(NavigationTool):
 					BuildingTool._last_road_built = BuildingTool._last_road_built[-3:]
 
 			# check how to continue: either build again or escape
-			if ((evt.isShiftPressed() or horizons.globals.fife.get_uh_setting('UninterruptedBuilding')) \
+			if ((evt.isShiftPressed() or horizons.globals.fife.get_uh_setting('UninterruptedBuilding'))
 			    and not self._class.id == BUILDINGS.WAREHOUSE) \
 			    or not found_buildable \
 			    or self._class.class_package == 'path':
@@ -640,14 +643,15 @@ class BuildingTool(NavigationTool):
 	def update_preview(self, force=False):
 		"""Used as callback method"""
 		if self.start_point is not None:
-			self.preview_build(self.start_point,
-			                   self.start_point if self.end_point is None else self.end_point, force=force)
+			end_point = self.start_point if self.end_point is None else self.end_point
+			self.preview_build(self.start_point, end_point, force=force)
 
 	def rotate_right(self):
 		self.rotation = (self.rotation + 270) % 360
 		self.log.debug("BuildingTool: Building rotation now: %s", self.rotation)
 		self.update_preview()
 		if self.__class__.gui is not None: # Only update if a preview gui is available
+			#TODO When is no preview gui available?
 			self.draw_gui()
 
 	def rotate_left(self):
@@ -655,11 +659,11 @@ class BuildingTool(NavigationTool):
 		self.log.debug("BuildingTool: Building rotation now: %s", self.rotation)
 		self.update_preview()
 		if self.__class__.gui is not None: # Only update if a preview gui is available
+			#TODO When is no preview gui available?
 			self.draw_gui()
 
 	def _remove_building_instances(self):
 		"""Deletes fife instances of buildings"""
-
 		try:
 			self._class.get_component_template(SelectableComponent)
 		except KeyError:
