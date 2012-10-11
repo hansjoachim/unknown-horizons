@@ -111,10 +111,16 @@ class GeneralLoader(object):
 
 	@classmethod
 	def _rotate_roads(cls, action):
-		"""Rotate around 'abcd' and 'efgh' like this (for 2 iterations):
-		'a' => 'b' => c, 'c' => 'd' => 'a', 'g' => 'h' => 'e',
-		'abd' >> sorted('bca') = 'abc' >> 'bcd'
-		'acde' >> sorted('bdaf') = 'abdf' >> sorted('bcag') = 'abcg'
+		"""Rotate around 'abcd' and 'efgh' like this:
+		>>> G = GeneralLoader()
+		>>> G._rotate_roads('a')
+		'b'
+		>>> G._rotate_roads('bd')
+		'ac'
+		>>> G._rotate_roads('acde')
+		'abdf'
+		>>> G._rotate_roads('abdf')
+		'abcg'
 		"""
 		if action == 'single':
 			return action
