@@ -113,20 +113,20 @@ class GeneralLoader(object):
 	def _rotate_roads(cls, action):
 		"""Rotate around 'abcd' and 'efgh' like this (for 2 iterations):
 		'a' => 'b' => c, 'c' => 'd' => 'a', 'g' => 'h' => 'e',
-		'abd' => ('bca') 'abc' => 'bcd'
-		'acde' => ('bdaf') 'abdf' => ('bcag') 'abcg' """
-		base_actions = ['abcd', 'efgh']
+		'abd' >> sorted('bca') = 'abc' >> 'bcd'
+		'acde' >> sorted('bdaf') = 'abdf' >> sorted('bcag') = 'abcg'
+		"""
 		if action == 'single':
-			return 'single'
-		for base in base_actions:
-			new_parts = []
-			for part in action:
-				if not part in base:
-					new_parts += part
-				else:
-					wrap_last = len(base) * (part == base[-1])
-					new_parts += chr(ord(part) + 1 - wrap_last)
-			action = ''.join(sorted(new_parts))
+			return action
+
+		base = 'abcda' + 'efghe'
+
+		new_action = []
+		for char in action:
+			idx = base.index(char)
+			new_action += base[idx + 1]
+
+		action = ''.join(sorted(new_action))
 		return action
 
 	@classmethod
