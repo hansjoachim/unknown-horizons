@@ -69,6 +69,7 @@ class Window(object):
 		widget.capture(self._on_keypress, event_name="keyPressed")
 
 	def _on_keypress(self, event):
+		print event
 		if event.getKey().getValue() == fife.Key.ESCAPE:
 			self.on_escape()
 
@@ -204,6 +205,7 @@ class WindowManager(object):
 		"""
 		# TODO for popups, we sometimes want the old widget to stay visible
 
+		print self._windows
 		self.hide()
 		self._windows.append(widget)
 		return widget.show(**kwargs)
