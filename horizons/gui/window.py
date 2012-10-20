@@ -69,7 +69,6 @@ class Window(object):
 		widget.capture(self._on_keypress, event_name="keyPressed")
 
 	def _on_keypress(self, event):
-		print event
 		if event.getKey().getValue() == fife.Key.ESCAPE:
 			self.on_escape()
 

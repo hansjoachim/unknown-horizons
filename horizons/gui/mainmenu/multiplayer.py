@@ -69,14 +69,16 @@ class GamesList(Window):
 		refresh_worked = self._refresh()
 		if not refresh_worked:
 			self.windows.close()
-			return False
+			return
 
 		self._widget.findChild(name='gamelist').capture(self._update_game_details)
 		self._widget.findChild(name='showonlyownversion').capture(self._refresh)
 
 		self._playerdata = PlayerDataSelection(self._widget, self._widget_loader)
 
+		self._capture_escape(self._widget)
 		self._widget.show()
+		self._focus(self._widget)
 
 	def hide(self):
 		self._widget.hide()
