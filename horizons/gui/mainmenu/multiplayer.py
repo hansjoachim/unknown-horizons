@@ -321,11 +321,11 @@ class GameLobby(Window):
 		NetworkInterface().register_kick_callback(self._player_kicked)
 		NetworkInterface().register_player_toggle_ready_callback(self._player_toggled_ready)
 
-		self._game = None
+	@property
+	def _game(self):
+		return NetworkInterface().get_game()
 
 	def show(self):
-		self._game = NetworkInterface().get_game()
-
 		self._widget_loader.reload('multiplayer_gamelobby') # remove old chat messages, etc
 
 		event_map = {
@@ -346,7 +346,6 @@ class GameLobby(Window):
 
 	def hide(self):
 		self._widget.hide()
-		self._game = None
 
 	def _update_game_details(self):
 		self._widget.findChild(name="game_map").text = _("Map: {map_name}").format(map_name=self._game.get_map_name())
@@ -410,12 +409,14 @@ class GameLobby(Window):
 				self._print(_("{player} not ready anymore").format(player=plnew.name))
 
 	def _player_changed_name(self, game, plold, plnew, myself):
+		self._update_game_details()
 		if myself:
 			self._print(_("You are now known as {new_name}").format(new_name=plnew.name))
 		else:
 			self._print(_("{player} is now known as {new_name}").format(player=plold.name, new_name=plnew.name))
 
 	def _player_changed_color(self, game, plold, plnew, myself):
+		self._update_game_details()
 		if myself:
 			self._print(_("You changed your color"))
 		else:
@@ -490,16 +491,14 @@ class GameLobby(Window):
 	def _show_change_player_details_popup(self):
 		"""Shows a dialog where the player can change its name and/or color"""
 
-		def _get_unused_colors():
-			"""Returns unused colors list in a game """
-			assigned = [p["color"] for p in NetworkInterface().get_game().get_player_list() if p["name"] != NetworkInterface().get_client_name() ]
-			available = set(Color) - set(assigned)
-			return available
+		# find colors not used by players in the current game
+		assigned = [p["color"] for p in NetworkInterface().get_game().get_player_list() if p["name"] != NetworkInterface().get_client_name()]
+		available_colors = set(Color) - set(assigned)
 
 		dialog = self._widget_loader['set_player_details']
 		dialog.findChild(name="playerdataselectioncontainer").removeAllChildren()
 
-		playerdata = PlayerDataSelection(dialog, self._widget_loader, color_palette=_get_unused_colors())
+		playerdata = PlayerDataSelection(dialog, self._widget_loader, color_palette=available_colors)
 		playerdata.set_player_name(NetworkInterface().get_client_name())
 		playerdata.set_color(NetworkInterface().get_client_color())
 
@@ -510,7 +509,6 @@ class GameLobby(Window):
 			playercolor = playerdata.get_player_color()
 			NetworkInterface().change_color(playercolor.id)
 
-			self._update_game_details()
 			dialog.hide()
 
 		def _cancel():
@@ -526,7 +524,6 @@ class GameLobby(Window):
 
 	def _toggle_ready(self):
 		NetworkInterface().toggle_ready()
-
 
 
 class MultiplayerMenu(Window):

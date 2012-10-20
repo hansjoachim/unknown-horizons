@@ -204,7 +204,6 @@ class WindowManager(object):
 		"""
 		# TODO for popups, we sometimes want the old widget to stay visible
 
-		print self._windows
 		self.hide()
 		self._windows.append(widget)
 		return widget.show(**kwargs)
