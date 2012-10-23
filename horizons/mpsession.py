@@ -82,3 +82,17 @@ class MPSession(Session):
 
 		SaveCommand( savegamename ).execute(self)
 		return True
+
+	def start(self):
+		self.__network_interface.register_error_callback(self._on_error)
+		super(MPSession, self).start()
+
+	def _on_error(self, exception, fatal=True):
+		# stop processing packets
+		if fatal:
+			self.timer.ticks_per_second = 0
+
+		self.ingame_gui.show_popup(_("Fatal Network Error"),
+		                           _("Something went wrong with the network:") + u'\n' +
+		                           unicode(exception) )
+		self.ingame_gui.quit_session(force=True)

@@ -297,6 +297,10 @@ class NetworkInterface(object):
 			return
 		self.cbs_error.append(function)
 
+	def unregister_error_callback(self, function):
+		if function in self.cbs_error:
+			self.cbs_error.remove(function)
+
 	def _cb_error(self, exception=u"", fatal=True):
 		for callback in self.cbs_error:
 			callback(exception, fatal)

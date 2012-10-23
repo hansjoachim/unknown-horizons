@@ -612,7 +612,7 @@ class MultiplayerMenu(Window):
 	def _on_error(self, exception, fatal=True):
 		"""Error callback"""
 
-		# TODO what does this accomplish?
+		# stop processing packets
 		if fatal and self._gui.session is not None:
 			self._gui.session.timer.ticks_per_second = 0
 		"""
@@ -647,6 +647,7 @@ class MultiplayerMenu(Window):
 		horizons.main.prepare_multiplayer(game)
 
 	def __start_game(self, game):
+		NetworkInterface().unregister_error_callback(self._on_error)
 		import horizons.main
 		horizons.main.start_multiplayer(game)
 
