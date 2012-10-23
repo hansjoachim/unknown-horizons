@@ -329,7 +329,7 @@ class GameLobby(Window):
 		self._widget_loader.reload('multiplayer_gamelobby') # remove old chat messages, etc
 
 		event_map = {
-			'cancel': self.windows.close,
+			'cancel': self._exit,
 			'ready_btn': self._toggle_ready,
 		}
 		self._widget = self._widget_loader['multiplayer_gamelobby']
@@ -346,6 +346,14 @@ class GameLobby(Window):
 
 	def hide(self):
 		self._widget.hide()
+
+	def _exit(self):
+		"""Leave the game when the lobby is closed."""
+		NetworkInterface().leavegame()
+		self.windows.close()
+
+	def on_escape(self):
+		self._exit()
 
 	def _update_game_details(self):
 		self._widget.findChild(name="game_map").text = _("Map: {map_name}").format(map_name=self._game.get_map_name())
@@ -557,6 +565,7 @@ class MultiplayerMenu(Window):
 				return
 
 		if NetworkInterface().isjoined():
+			assert False, 'This should not happen, someone else forgot to clean up'
 			if not NetworkInterface().leavegame():
 				return
 
