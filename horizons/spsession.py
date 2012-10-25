@@ -21,8 +21,6 @@
 
 import random
 
-import horizons.main
-
 from horizons.session import Session
 from horizons.manager import SPManager
 from horizons.constants import SINGLEPLAYER
@@ -75,7 +73,7 @@ class SPSession(Session):
 		@return: bool, whether no error happened (user aborting dialog means success)
 		"""
 		if savegamename is None:
-			savegamename = self.gui.show_select_savegame(mode='save')
+			savegamename = self.ingame_gui.windows.show(self.ingame_gui._saveload, mode='save')
 			if savegamename is None:
 				return True # user aborted dialog
 			savegamename = SavegameManager.create_filename(savegamename)

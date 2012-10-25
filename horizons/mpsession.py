@@ -75,8 +75,10 @@ class MPSession(Session):
 				else:
 					return True
 			sanity_criteria = _("The filename must consist only of letters, numbers, spaces and _.-")
-			savegamename = self.gui.show_select_savegame(mode='mp_save', sanity_checker=sanity_checker,
-			                                             sanity_criteria=sanity_criteria)
+			savegamename = self.ingame_gui.windows.show(self.ingame_gui._saveload,
+			                                            mode='mp_save',
+			                                            sanity_checker=sanity_checker,
+			                                            sanity_criteria=sanity_criteria)
 			if savegamename is None:
 				return True # user aborted dialog
 

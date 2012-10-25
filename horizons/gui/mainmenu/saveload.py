@@ -51,17 +51,18 @@ class SaveLoad(Dialog):
 
 		map_files, map_file_display = None, None
 
-		# restore old settings if available
-		if not hasattr(self, '_args'):
-			self._args = {'mode': mode, 'sanity_checker': sanity_checker, 'sanity_criteria': sanity_criteria} # for reshowing the dialog
-		else:
-			mode, sanity_checker, sanity_criteria = self._args['mode'], self._args['sanity_checker'], self._args['sanity_criteria']
-
-		assert mode in ('save', 'load', 'mp_load', 'mp_save')
-
 		mp = mode.startswith('mp_')
 		if mp:
 			mode = mode[3:]
+
+		# restore old settings if available
+		if not hasattr(self, '_args'):
+			self._args = {'mode': mode, 'sanity_checker': sanity_checker, 'sanity_criteria': sanity_criteria, 'mp': mp} # for reshowing the dialog
+		else:
+			mode, sanity_checker, sanity_criteria, mp = self._args['mode'], self._args['sanity_checker'], self._args['sanity_criteria'], self._args['mp']
+
+		assert mode in ('save', 'load', 'mp_load', 'mp_save')
+
 		# below this line, mp_load == load, mp_save == save
 		if mode == 'load':
 			if not mp:

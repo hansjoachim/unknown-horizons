@@ -81,7 +81,7 @@ class Gui(object):
 		GuiAction.subscribe( self._on_gui_action )
 
 	def load_game(self):
-		saved_game = self.show_select_savegame(mode='load')
+		saved_game = self._windows.show(self._saveload, mode='load')
 		if saved_game is None:
 			return False # user aborted dialog
 
@@ -96,10 +96,6 @@ class Gui(object):
 		Can be called both from main menu and in-game interface.
 		"""
 		self._windows.toggle(self._help)
-
-	def show_select_savegame(self, mode, sanity_checker=None, sanity_criteria=None):
-		return self._windows.show(self._saveload, mode=mode, sanity_checker=sanity_checker,
-		                          sanity_criteria=sanity_criteria)
 
 # display
 
