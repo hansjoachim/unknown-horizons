@@ -537,6 +537,10 @@ class GameLobby(Window):
 class MultiplayerMenu(Window):
 	log = logging.getLogger("networkinterface")
 
+	def __init__(self, *args, **kwargs):
+		super(MultiplayerMenu, self).__init__(*args, **kwargs)
+		self._starting_game = False
+
 	def show(self):
 		"""Shows main multiplayer menu"""
 		if enet == None:
@@ -579,10 +583,7 @@ class MultiplayerMenu(Window):
 		self.windows.show(self._gameslist)
 
 	def close(self):
-		# FIXME network connection should be closed once we exit the menu (but not when it
-		# is closed because we started a game)
-		#self.__cancel()
-		pass
+		self.__cancel()
 
 	def _do_close(self):
 		self.windows.close()
@@ -632,7 +633,7 @@ class MultiplayerMenu(Window):
 			self._gui.quit_session(force=True)
 
 	def __cancel(self):
-		if NetworkInterface().isconnected():
+		if not self._starting_game and NetworkInterface().isconnected():
 			NetworkInterface().disconnect()
 
 	def __game_terminated(self, game, errorstr):
@@ -644,7 +645,12 @@ class MultiplayerMenu(Window):
 		# send map data
 		# NetworkClient().sendmapdata(...)
 		import horizons.main
-		horizons.main.prepare_multiplayer(game)
+		try:
+			self._starting_game = True
+			horizons.main.prepare_multiplayer(game)
+		except:
+			self._starting_game = False
+			raise
 
 	def __start_game(self, game):
 		NetworkInterface().unregister_error_callback(self._on_error)
