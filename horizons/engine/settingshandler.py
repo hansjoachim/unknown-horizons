@@ -52,11 +52,11 @@ class SettingsHandler(object):
 		#       possibility: use signaling via changelistener
 		def update_minimap(*args):
 			try: horizons.main._modules.session.ingame_gui.minimap.draw()
-			except AttributeError: pass # session or gui not yet initialised
+			except AttributeError: pass # session or gui not yet initialized
 
 		def update_autosave_interval(*args):
 			try: horizons.main._modules.session.reset_autosave()
-			except AttributeError: pass # session or gui not yet initialised
+			except AttributeError: pass # session or gui not yet initialized
 
 
 		#self.createAndAddEntry(self, module, name, widgetname, applyfunction=None, initialdata=None, requiresrestart=False)
@@ -116,7 +116,7 @@ class SettingsHandler(object):
 			self.set_debug_log(True, startup=True)
 
 	def setup_setting_extras(self):
-		"""Some kind of setting gui initalisation"""
+		"""Some kind of setting gui initialization"""
 		#slider_initial_data exposes initial data when menu settings opened
 		slider_initial_data = {}
 		#slider_event_map should contain slider name as key and function

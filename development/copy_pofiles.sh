@@ -24,7 +24,7 @@
 #    idea what '%s' means, especially with multiple substitutions. BIG FAT NOTE
 #    You will need to add the following line right before your string in python
 #      #xgettext:python-format
-#    for the string to be properly recognised in pootle.          /BIG FAT NOTE
+#    for the string to be properly recognized in pootle.          /BIG FAT NOTE
 #    This comment can also go inline after the format string, but prefer above.
 #
 # ** I changed or added strings in the tutorial yaml file

@@ -275,7 +275,7 @@ class Rect(Shape):
 
 class ConstRect(Const, Rect):
 	"""An immutable Rect.
-	Can be used for manual const-only optimisation"""
+	Can be used for manual const-only optimization"""
 	pass
 
 

@@ -338,7 +338,7 @@ class Island(BuildingOwner, WorldObject):
 		# so do nothing in this case.
 
 	def _init_cache(self):
-		""" initialises the cache that knows when the last time the buildability of a rectangle may have changed on this island """
+		""" initializes the cache that knows when the last time the buildability of a rectangle may have changed on this island """
 		self.last_change_id = -1
 
 		def calc_cache(size_x, size_y):
@@ -378,7 +378,7 @@ class Island(BuildingOwner, WorldObject):
 						building_areas[coords] = self.last_change_id
 
 	def end(self):
-		# NOTE: killing animals before buildings is an optimisation, else they would
+		# NOTE: killing animals before buildings is an optimization, else they would
 		# keep searching for new trees every time a tree is torn down.
 		for wild_animal in (wild_animal for wild_animal in self.wild_animals):
 			wild_animal.remove()

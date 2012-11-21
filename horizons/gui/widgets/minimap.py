@@ -652,7 +652,7 @@ class Minimap(object):
 	## CALC UTILITY
 	def _world_to_minimap(self, coord, use_rotation):
 		"""Complete coord transformation, batteries included.
-		The methods below are for more specialised purposes."""
+		The methods below are for more specialized purposes."""
 		coord = self._world_coord_to_minimap_coord( coord )
 
 		if use_rotation:

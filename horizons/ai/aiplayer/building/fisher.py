@@ -32,7 +32,7 @@ from horizons.entities import Entities
 
 class AbstractFisher(AbstractBuilding):
 	def get_production_level(self, building, resource_id):
-		return self.get_expected_production_level(resource_id) * building.get_non_paused_utilisation()
+		return self.get_expected_production_level(resource_id) * building.get_non_paused_utilization()
 
 	def get_expected_cost(self, resource_id, production_needed, settlement_manager):
 		evaluators = self.get_evaluators(settlement_manager, resource_id)
