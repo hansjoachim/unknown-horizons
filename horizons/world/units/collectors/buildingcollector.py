@@ -77,7 +77,7 @@ class BuildingCollector(Collector):
 		for tick, utilization in self._job_history:
 				# pre-translate the tick number for the loading process
 			translated_tick = tick - current_tick + Scheduler.FIRST_TICK_ID
-			db("INSERT INTO building_collector_job_history(collector, tick, utilization) VALUES(?, ?, ?)",
+			db("INSERT INTO building_collector_job_history(collector, tick, utilisation) VALUES(?, ?, ?)",
 				 self.worldid, translated_tick, utilization)
 
 	def load(self, db, worldid):
